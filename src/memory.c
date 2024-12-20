@@ -63,6 +63,11 @@ mlist_insert(struct mlist *m_list, void *addr, char data)
   }
   
   m_list->end->next = mlist_new_node(addr, data);
+  if(m_list->end->next == NULL)
+  {
+    pthread_rwlock_unlock(&m_list->lock);
+    return -1;
+  }
   m_list->end = m_list->end->next;
   
   pthread_rwlock_wrlock(&m_list->lock);
