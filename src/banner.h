@@ -16,27 +16,15 @@
   along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#define LICENSE "GPL-3.0"
-
-#ifndef XAVIER_MEMORY
-#define XAVIER_MEMORY
-
-#include <sys/types.h>
-
-struct mlist;
-
-struct memory_range
-{
-  long start_addr;
-  long end_addr;
-};
-
-struct mlist* mlist_new();
-char mlist_insert(struct mlist*, void* addr, char data);
-
-struct memory_range* search_memory_range(pid_t pid, char *memory_area);
-
-void mscan(pid_t pid);
-
-XAVIER_MEMORY
+#ifndef XAVIER_BANNER
+#define XAVIER_BANNER \
+"=============================================\n"\
+" ██   ██  █████  ██    ██ ██ ███████ ██████  \n"\
+"  ██ ██  ██   ██ ██    ██ ██ ██      ██   ██ \n"\
+"   ███   ███████ ██    ██ ██ █████   ██████  \n"\
+"  ██ ██  ██   ██  ██  ██  ██ ██      ██   ██ \n"\
+" ██   ██ ██   ██   ████   ██ ███████ ██   ██ \n"\
+"=============================================\n"\
+"          Linux Process Memory Tool          \n"\
+"            Created by: @tstwroot            \n"
 #endif

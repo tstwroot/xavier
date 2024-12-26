@@ -16,10 +16,15 @@
   along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include <pthread.h>
+#include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <pthread.h>
 
 #include "memory.h"
+
+#define PROC_MAPS_BASE_LENGTH 11 // "/proc//maps"
+#define MAX_LINE_SIZE 1024
 
 struct mnode
 {
@@ -90,4 +95,40 @@ mlist_insert(struct mlist *m_list, void *addr, char data)
   
   pthread_rwlock_wrlock(&m_list->lock);
   return 0;
+}
+
+int get_number_length(int number)
+{
+  int counter;
+  for(counter = 0; (number /= 10) != 0; counter++);
+  return counter + 1;
+}
+
+int get_proc_maps_size(pid_t pid)
+{
+  return PROC_MAPS_BASE_LENGTH + get_number_length(pid);
+}
+
+struct memory_range*
+search_memory_range(pid_t pid, char *memory_area)
+{
+  char *proc_maps_filepath = malloc(sizeof(char) * get_number_length(pid));
+  sprintf(proc_maps_filepath, "/proc/%d/maps", pid);
+  FILE *proc_maps_fp = fopen(proc_maps_filepath, "r");
+
+  if(proc_maps_fp == NULL)
+    return NULL;
+  
+  struct memory_range *memory_range = malloc(sizeof(struct memory_range));
+  
+  if(memory_range == NULL)
+    return NULL;
+  
+  char line[1024];
+
+  memset(line, 0, 1024);
+  
+  // TODO: Implement a read line
+
+  fclose(proc_maps_fp);
 }
