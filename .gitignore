@@ -1,6 +1,8 @@
 # Prerequisites
 *.d
 
+.gdb_history
+
 # Object files
 *.o
 *.ko
