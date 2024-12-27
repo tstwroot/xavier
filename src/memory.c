@@ -19,11 +19,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <string.h>
-#include <errno.h>
 #include <pthread.h>
-#include <sys/wait.h>
-#include <sys/ptrace.h>
 
 #include "memory.h"
 
@@ -63,7 +59,6 @@ mlist_new_node(void *addr, char data)
     return NULL;
 
   new_node->addr = addr;
-
   new_node->data = data;
   new_node->next = NULL;
   return new_node;
@@ -130,81 +125,10 @@ search_memory_range(pid_t pid, char *memory_area)
     return NULL;
   
   char line[1024];
-  int counter = 0;
-  char current_byte = 0;
 
   memset(line, 0, 1024);
-
-  while(fread(&current_byte, sizeof(char), 1, proc_maps_fp) > 0)
-  {
-    if(counter > MAX_LINE_SIZE)
-    {
-      fprintf(stderr, "Error: Line is out of bounds.\n");
-      exit(EXIT_FAILURE);
-    }
-
-    if(current_byte == '\n')
-    {
-      counter = 0;
-      if(strstr(line, memory_area) != NULL)
-      {
-        char s_addr[13];
-        char e_addr[13];
-        memset(s_addr, 0, 13);
-        memset(e_addr, 0, 13);
-
-        for(int i = 0; i < 12; i++) 
-        { 
-          s_addr[i] = line[i];  
-          e_addr[i] = line[i+13];
-        } 
-         
-        memory_range->start_addr = strtol(s_addr, NULL, 16);
-        memory_range->end_addr = strtol(e_addr, NULL, 16);
-        break;
-      }
-      memset(line, 0, 1024);
-      continue;
-    }
-    
-    line[counter] = current_byte; 
-    counter++;
-  }
+  
+  // TODO: Implement a read line
 
   fclose(proc_maps_fp);
-  return memory_range;
-}
-
-void mscan(pid_t pid)
-{
-  struct memory_range *stack = search_memory_range(pid, "[stack]");
-
-  if(ptrace(PTRACE_ATTACH, pid, NULL, NULL) == -1)
-  {
-    perror("ptrace(PTRACE_ATTACH) error.");
-    exit(EXIT_FAILURE);
-  }
-
-  waitpid(pid, NULL, 0);
-
-  long current_addr = stack->start_addr;
-  long data; 
-  while(current_addr <= stack->end_addr)
-  {
-    data = ptrace(PTRACE_PEEKDATA, pid, current_addr, NULL);
-  
-    errno = 0;
-
-    if(data == -1 && errno != 0)
-    { 
-      perror("ptrace(PTRACE_PEEKDATA) error.");
-      exit(EXIT_FAILURE);
-    }
-
-    printf("0x%lx -> %c\n", current_addr, (char)data);
-
-    current_addr++;
-  }
-
-  ptrace(PTRACE_DETACH, pid, NULL, NULL);
 }
